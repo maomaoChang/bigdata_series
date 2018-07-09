@@ -55,3 +55,34 @@ select name,count(*) over ()
 from t_window
 where substring(orderdate,1,7) = '2015-04'
 ```
+得到的结果为：
+```
+name    count_window_0
+mart    5
+mart    5
+mart    5
+mart    5
+jack    5
+```
+2015年4月共发生了5次购买记录，mart购买了4次，jack1次。大多数时候我们只想看去重后的结果，此时可以有两种实现方式：
+方式1：distinct
+```
+select distinct name,count(*) over ()
+from t_window
+where substring(orderdate,1,7) = '2015-04'
+```
+方式2：group by
+```
+select name,count(*) over ()
+from t_window
+where substring(orderdate,1,7) = '2015-04'
+group by name
+```
+执行后的结果都是一样的：
+```
+name count_window_0 
+mart 2 
+jack 2
+``` 
+
+### 1.Partition By子句  

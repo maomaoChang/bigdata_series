@@ -86,3 +86,31 @@ jack 2
 ``` 
 
 ### 1.Partition By子句  
+partition by子句称为查询分区字句，over之前的部分在一个分组内进行，如果超出了分组，则函数会重新计算。  
+比如，我要看顾客的购买明细及月购买总额：  
+```
+select name,
+       orderdate,
+       cost,
+       sum(cost) over (partition by month(orderdate)) 
+from t_window
+```  
+得到的结果为：  
+```
+name    orderdate   cost    sum_window_0
+jack    2015-01-01  10  205
+jack    2015-01-08  55  205
+tony    2015-01-07  50  205
+jack    2015-01-05  46  205
+tony    2015-01-04  29  205
+tony    2015-01-02  15  205
+jack    2015-02-03  23  23
+mart    2015-04-13  94  341
+jack    2015-04-06  42  341
+mart    2015-04-11  75  341
+mart    2015-04-09  68  341
+mart    2015-04-08  62  341
+neil    2015-05-10  12  12
+neil    2015-06-12  80  80
+```  
+可以看出，最后一行数据已经按照月份进行汇总了。

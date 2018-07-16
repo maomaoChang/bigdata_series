@@ -50,3 +50,19 @@ Hive主要有三种保存元数据的方式，分别为：
 3.Remote模式
   在服务器端启动一个MetaStoreServer,客户端利用Thriftx协议通过MetaStoreServer访问元数据库。
 ```
+
+#### 6.Hive内部表和外部表的区别  
+```
+1.内/外部表的创建语句
+  create [managed] table t1(name string); --内部
+  create external table t2(name string);  --外部
+2.数据存储方面
+  内部表数据由Hive自身管理，外部表数据由HDFS管理;
+  内部表数据存储的位置是hive.metastore.warehouse.dir（默认：/user/hive/warehouse），外部表数据的存储位置由自己制定;
+3.删除时
+  删除内部表会直接删除元数据（metadata）及存储数据；
+  删除外部表仅仅会删除元数据，HDFS上的文件并不会被删除；
+4.修改表时
+  对内部表的修改会将修改直接同步给元数据；
+  对外部表的表结构和分区进行修改，则需要修复（MSCK REPAIR TABLE table_name;）
+```

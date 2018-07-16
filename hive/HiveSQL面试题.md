@@ -39,3 +39,14 @@ insert overwrite table C
       开发专门的mapreduce应用，十分适合数据仓库的统计分析
     3.与RDBMS异同：
 ```
+
+#### 5.Hive保存元数据的方式有哪些，各有什么特点  
+```
+Hive主要有三种保存元数据的方式，分别为：
+1.内嵌的Derby模式(单用户模式)
+  Derby是Hive自带的一个关系型数据库，只支持单实例
+2.Local模式(多用户模式)
+  一般配合mysql服务器使用，支持多实例。需要本地运行一个mysql服务器，并将支持mysql的jar包手动放入$HIVE_HOME/lib中
+3.Remote模式
+  在服务器端启动一个MetaStoreServer,客户端利用Thriftx协议通过MetaStoreServer访问元数据库。
+```

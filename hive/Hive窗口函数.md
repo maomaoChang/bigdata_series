@@ -113,4 +113,32 @@ mart    2015-04-08  62  341
 neil    2015-05-10  12  12
 neil    2015-06-12  80  80
 ```  
-可以看出，最后一行数据已经按照月份进行汇总了。
+可以看出，最后一行数据已经按照月份进行汇总了。  
+
+### 2.Order By子句  
+order by子句会让输入的数据强制排序,Order By子句对于诸如Row_Number()，Lead()，LAG()等函数是必须的，因为如果数据无序，这些函数的结果就没有任何意义。使用方式如下：  
+```
+select name,
+       orderdate,
+       cost,
+       sum(cost) over(partition by month(orderdate) order by orderdate )
+from t_window
+``` 
+得到的结果为:(order by默认情况下聚合从起始行当当前行的数据)
+```
+name    orderdate   cost    sum_window_0
+jack    2015-01-01  10  10
+tony    2015-01-02  15  25
+tony    2015-01-04  29  54
+jack    2015-01-05  46  100
+tony    2015-01-07  50  150
+jack    2015-01-08  55  205
+jack    2015-02-03  23  23
+jack    2015-04-06  42  42
+mart    2015-04-08  62  104
+mart    2015-04-09  68  172
+mart    2015-04-11  75  247
+mart    2015-04-13  94  341
+neil    2015-05-10  12  12
+neil    2015-06-12  80  80
+```

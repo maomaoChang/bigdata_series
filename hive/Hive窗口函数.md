@@ -141,4 +141,52 @@ mart    2015-04-11  75  247
 mart    2015-04-13  94  341
 neil    2015-05-10  12  12
 neil    2015-06-12  80  80
+```  
+
+### 3. window 字句  
+上面已经通过partition by对数据做了分组，但是如果想要更细的粒度，就需要借助于window字句来实现:  
+明确两个概念：  
+1.只使用partition by而不制定order by,聚合为分组内聚合
+2.使用order by,未使用window字句的情况下，默认从起点到当前行  
+**当同一个select查询中存在多个窗口函数时,他们相互之间是没有影响的.每个窗口函数应用自己的规则.**  
+window字句包含：
+1. PRECEDING 往前
+2. FOLLOWING 往后
+3. CURRENT ROW 当前行
+4. UNBOUNDED 起点  
+
++ UNBOUNDED PRECEDING 从前面的起点
++ UNBOUNDED FOLLOWING 到后面的终点  
+
+我们按照name进行分区,按照购物时间进行排序,做cost的累加：  
+``` sql
+select name,orderdate,cost,
+sum(cost) over() as sample1,--所有行相加
+sum(cost) over(partition by name) as sample2,--按name分组，组内数据相加
+sum(cost) over(partition by name order by orderdate) as sample3,--按name分组，组内数据累加
+sum(cost) over(partition by name order by orderdate rows between UNBOUNDED PRECEDING and current row )  as sample4 ,--和sample3一样,由起点到当前行的聚合
+sum(cost) over(partition by name order by orderdate rows between 1 PRECEDING   and current row) as sample5, --当前行和前面一行做聚合
+sum(cost) over(partition by name order by orderdate rows between 1 PRECEDING   AND 1 FOLLOWING  ) as sample6,--当前行和前边一行及后面一行
+sum(cost) over(partition by name order by orderdate rows between current row and UNBOUNDED FOLLOWING ) as sample7 --当前行及后面所有行
+from t_window;
 ```
+得到的查询结果为：  
+```
+name    orderdate   cost    sample1 sample2 sample3 sample4 sample5 sample6 sample7
+jack    2015-01-01  10  661 176 10  10  10  56  176
+jack    2015-01-05  46  661 176 56  56  56  111 166
+jack    2015-01-08  55  661 176 111 111 101 124 120
+jack    2015-02-03  23  661 176 134 134 78  120 65
+jack    2015-04-06  42  661 176 176 176 65  65  42
+mart    2015-04-08  62  661 299 62  62  62  130 299
+mart    2015-04-09  68  661 299 130 130 130 205 237
+mart    2015-04-11  75  661 299 205 205 143 237 169
+mart    2015-04-13  94  661 299 299 299 169 169 94
+neil    2015-05-10  12  661 92  12  12  12  92  92
+neil    2015-06-12  80  661 92  92  92  92  92  80
+tony    2015-01-02  15  661 94  15  15  15  44  94
+tony    2015-01-04  29  661 94  44  44  44  94  79
+tony    2015-01-07  50  661 94  94  94  79  79  50
+```  
+
+### 4.窗口函数中的序列函数
